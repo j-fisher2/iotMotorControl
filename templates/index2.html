@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Control</title>
+    <style>
+        /* Center the content */
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* Container for the fan control */
+        .container {
+            text-align: center;
+        }
+
+        /* The switch - the box around the slider */
+        .switch {
+            position: relative;
+            display: block;  /* Make the switch container block-level */
+            width: 60px;
+            height: 34px;
+            margin: 10px auto;  /* Center switches with space between them */
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* Additional styling for spacing */
+        h3 {
+            margin: 10px 0;
+        }
+        .settings-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid black;
+            display: flex; /* Enable flexbox */
+            flex-direction: column; /* Arrange children vertically */
+            align-items: center; /* Center items horizontally */
+            justify-content: center; /* Center items vertically */
+        }
+        
+        .settings-button {
+            position: relative;
+            background-color: gray; /* Remove quotes */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-top:20px;
+        }
+
+        .settings-button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+  <div class="container">
+        <h3>Fan Control</h3>
+        <label class="switch">
+            <input type="checkbox" id="fanToggle">
+            <span class="slider round"></span>
+        </label>
+    <h3>Auto Mode ({{auto_temp}})</h3>
+        <label class="switch">
+            <input type="checkbox" id="autoModeToggle">
+            <span class="slider round"></span>
+        </label>
+        <h3 id="current-temp">Current Temperature: Loading...</h3>
+    </div>
+    <button class="settings-button" onclick="goToSettings()">Settings</button>
+  </div>
+<script>
+  // Get the toggle switch elements
+  const fanToggle = document.getElementById('fanToggle');
+  const autoModeToggle = document.getElementById('autoModeToggle');
+  const temperatureReadings = [];
+
+  setInterval(()=>{
+      fetch('/check-auto').then(res=>res.json()).then(data =>{console.log(data)}).catch(err =>console.error('error checking auto mode:',error));},2000);
+  
+  setInterval(()=>{
+      fetch('/get-current-temperature').then(res=>res.json()).then(data =>{const temp = document.getElementById('current-temp');temp.innerHTML = `Current Temperature: ${data.temperature}°C`;
+          if(temperatureReadings.length >=2){
+            temperatureReadings.shift();
+          }
+          temperatureReadings.push(Number(data.temperature));
+          if(temperatureReadings.length == 2){
+              const diff = Math.abs(temperatureReadings[1] - temperatureReadings[0]);
+              if(diff >= 5){
+                  alert(`Temperature fluctuation detected: ${diff}*C`);
+              }
+          }
+          }).catch(err =>console.error('error fetching temperature:',error));},2000);
+
+  // This function is called when the fan switch state changes
+  function toggleFanState() {
+    if (fanToggle.checked) {
+      // Fan should start
+      fetch('/start-fan')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.message); // Log response from server
+        })
+        .catch(error => console.error('Error starting fan:', error));
+    } else {
+      // Fan should stop
+      fetch('/stop-fan')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.message); // Log response from server
+        })
+        .catch(error => console.error('Error stopping fan:', error));
+    }
+  }
+
+  // This function is called when the auto mode switch state changes
+  function toggleAutoMode() {
+    if (autoModeToggle.checked) {
+      // Enable auto mode
+      fetch('/enable-auto-mode')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.message); // Log response from server
+        })
+        .catch(error => console.error('Error enabling auto mode:', error));
+    } else {
+      // Disable auto mode
+      fetch('/disable-auto-mode')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.message); // Log response from server
+        })
+        .catch(error => console.error('Error disabling auto mode:', error));
+    }
+  }
+
+  // Attach event listeners to the checkboxes
+  fanToggle.addEventListener('change', toggleFanState);
+  autoModeToggle.addEventListener('change', toggleAutoMode);
+  function goToSettings() {
+            window.location.href = '/settings';
+        }
+</script>
+</body>
+</html>
