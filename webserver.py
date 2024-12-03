@@ -39,8 +39,8 @@ ADMIN_PASSCODE = "00000"
 AUTO_MODE_EVENT = threading.Event()  # Event for auto mode control
 AUTO_MODE_EVENT.clear()
 AUTO_MODE = False
-SECURITY_LOG_ENDPOINT = "https://api.thingspeak.com/update?api_key=0WHNH25IGLEMVSR6&field1=1"
-TEMP_LOG_ENDPOINT = " https://api.thingspeak.com/update?api_key=INP1SFW1ZWB8BMDA&field1="
+SECURITY_LOG_ENDPOINT = "https://api.thingspeak.com/update?api_key=0WHNH25IGLEMVSR&field1=1"
+TEMP_LOG_ENDPOINT = " https://api.thingspeak.com/update?api_key=INP1SFW1ZWB8BMD&field1="
 
 # Function to get temperature from SensorTag
 def get_temperature_from_sensortag():
