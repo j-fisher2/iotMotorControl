@@ -20,3 +20,5 @@ Make sure you have the following installed and configured:
 - **bluepy**: To interact with Bluetooth Low Energy (BLE) devices (SensorTag)
 - **ThingSpeak Account**: To log temperature and security status (get API keys)
 
+Start webserver `python3 webserver.py` available at http://localhost:5000
+
